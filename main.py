@@ -52,7 +52,7 @@ class OwnCloudUploader():
 
         #too lazy to actually do the UI stuff so hardcode here for now
         self.shoxify = True
-        self.shoxyServer = "http://xn--zce.tv/"
+        self.shoxyServer = "https://monokles.eu/shoxySSL"
         self.shoxyLength = 2
         self.shoxyBypassKey   = None
 
