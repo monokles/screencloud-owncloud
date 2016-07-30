@@ -49,6 +49,13 @@ class OwnCloudUploader():
         self.nameFormat = settings.value("name-format", "Screenshot at %H:%M:%S")
         self.copyLink = settings.value("copy-link", "true") in ['true', True]
         self.copyDirectLink = settings.value("copy-direct-link", "false") in ['true', True]
+
+        #too lazy to actually do the UI stuff so hardcode here for now
+        self.shoxify = True
+        self.shoxyServer = "http://xn--zce.tv/"
+        self.shoxyLength = 2
+        self.shoxyBypassKey   = None
+
         settings.endGroup()
         settings.endGroup()
 
@@ -130,6 +137,17 @@ class OwnCloudUploader():
 
             QMessageBox.critical(self.settingsDialog, "OwnCloud Connection Error", "The " + missingFields + " " + fieldText + " must be filled in!")
 
+
+    def doShoxify(self, url):
+        import json
+
+        body = { "url": url, "length": self.shoxyLength }
+        body["bypassKey"] = self.shoxyBypassKey if self.shoxyBypassKey is not None else None
+        reqHeaders = {"content-type": "application/json"}
+        res = requests.post(self.shoxyServer, data=json.dumps(body), headers=reqHeaders)
+        res = res.json()
+        return res["url"]
+
     def upload(self, screenshot, name):
         self.loadSettings()
         timestamp = time.time()
@@ -165,8 +183,12 @@ class OwnCloudUploader():
                 if self.copyDirectLink:
                     share_link = share_link + "/download"
 
+                if self.shoxify:
+                    share_link = self.doShoxify(share_link)
+
                 ScreenCloud.setUrl(share_link)
             return True
+
         except Exception as e:
             ScreenCloud.setError("Failed to upload to OwnCloud. " + e.message)
             return False
